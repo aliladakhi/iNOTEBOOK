@@ -18,11 +18,12 @@ router.post(
     body("password").isLength({ min: 5 }),
   ],
   async (req, res) => {
-    console.log(req.body);
-
+    let success = false;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      success=false;
       return res.status(400).json({ errors: errors.array() });
+      
     }
     // Create a new User instance using the User model
     try {
@@ -30,7 +31,7 @@ router.post(
       if (user) {
         return res
           .status(400)
-          .json({ error: "Sorry a user with this email already exist" });
+          .json({success, error: "Sorry a user with this email already exist" });
       }
       const salt = await bcrypt.genSalt(10);
       const secPass = await bcrypt.hash(req.body.password, salt);
@@ -47,9 +48,9 @@ router.post(
         },
       };
       const authToken = jwt.sign(data,JMT_SECT);
+      success=true
+      res.json({success, authToken: authToken });
       res.setHeader('Content-Type', 'application/json');
-      console.log(authToken);
-      res.json({ authToken: authToken });
     } catch (error) {
       res.status(500).send("server Error occured");
     }

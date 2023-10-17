@@ -14,7 +14,7 @@ function Home() {
       id:id,
       etitle: newTitle,
       etag: newTag,
-      edescription: newDescription,
+      edescription: newDescription
     });
   };
 
