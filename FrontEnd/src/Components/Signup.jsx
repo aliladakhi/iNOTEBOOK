@@ -1,8 +1,10 @@
 import React, { useEffect, useState,useContext } from "react";
 import noteContext from "../Context/Notes/noteContext";
 import "../style/Signup.css";
+import { useNavigate } from "react-router-dom";
 
 function Signup() {
+  const navigate=useNavigate();
   const {setAlert}=useContext(noteContext)
   const [type, setType] = useState("password");
   const [chk, setcheck] = useState(false);
@@ -14,35 +16,47 @@ function Signup() {
   });
 
   const saveCred = async () => {
-    const response = await fetch("http://localhost:5000/api/auth/createuser", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: cred.username,
-        email: cred.email,
-        password: cred.password,
-      }),
-    }).catch(error => console.error('Error:', error));
-
-    const json = await response.json();
- 
-
-    if (json.success) {
-      localStorage.setItem("token", json.authToken);
-      //   history.push("/");
-      setCred({ username: "",
-    email: "",
-    password: "",
-    confirm_password: ""})
-    handleAlert({type:"okay",message:"Login successgully "})
-    } else {
-      handleAlert({type:"error",message:"Login not  "})
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/createuser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: cred.username,
+          email: cred.email,
+          password: cred.password,
+        }),
+      });
+  
+      if (!response) {
+        throw new Error("Response is undefined");
+      }
+  
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+  
+      const json = await response.json();
+  
+      if (json.success) {
+        localStorage.setItem("token", json.authToken);
+        setCred({
+          username: "",
+          email: "",
+          password: "",
+          confirm_password: "",
+        });
+        handleAlert({ type: "okay", message: "Signup successfully" });
+        navigate("/")
+      } else {
+        handleAlert({ type: "error", message: "Signup not successful" });
+      }
+    } catch (error) {
+      console.error('Error:', error);
     }
-
-    
   };
+  
 
   const handleAlert=({type,message})=>{
     setAlert({type,message});
