@@ -12,7 +12,6 @@ router.get("/fetchallnotes", fetchuser, async (req, res) => {
     } catch (error) {
         res.status(500).send("server Error occured");
     }
-  
 });
 
 // Route 2:Add a new  notes "/api/notes/addnote". Login require

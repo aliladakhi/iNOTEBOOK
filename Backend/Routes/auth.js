@@ -8,6 +8,8 @@ const fetchuser = require("../middleware/fetchuser");
 
 
 const JMT_SECT = "abcdefghijklmno";
+
+
 // Create a user using POST "/api/auth/createuser". Does not require Auth
 //Route 1
 router.post(
@@ -18,11 +20,9 @@ router.post(
     body("password").isLength({ min: 5 }),
   ],
   async (req, res) => {
-    let success = false;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      success=false;
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({success:false, errors: errors.array() });
       
     }
     // Create a new User instance using the User model
@@ -31,7 +31,7 @@ router.post(
       if (user) {
         return res
           .status(400)
-          .json({success, error: "Sorry a user with this email already exist" });
+          .json({success:false, error: "Sorry a user with this email already exist" });
       }
       const salt = await bcrypt.genSalt(10);
       const secPass = await bcrypt.hash(req.body.password, salt);
@@ -48,9 +48,9 @@ router.post(
         },
       };
       const authToken = jwt.sign(data,JMT_SECT);
-      success=true
-      res.json({success, authToken: authToken });
+      
       res.setHeader('Content-Type', 'application/json');
+      res.json({success : true, authToken: authToken });
     } catch (error) {
       res.status(500).send("server Error occured");
     }
@@ -62,25 +62,23 @@ router.post('/login', [
   body('email', 'Enter a valid email').isEmail(),
   body('password', 'Password cannot be blank').exists(),
 ], async (req, res) => {
-  let success = false;
-  // If there are errors, return Bad request and the errors
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-  const { email, password } = req.body;
   try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { email, password } = req.body;
     let user = await User.findOne({ email });
+
     if (!user) {
-      success = false
       return res.status(400).json({ error: "Please try to login with correct credentials" });
     }
 
     const passwordCompare = await bcrypt.compare(password, user.password);
     if (!passwordCompare) {
-      success = false
-      return res.status(400).json({ success, error: "Please try to login with correct credentials" });
+      return res.status(400).json({ success: false, error: "Please try to login with correct credentials" });
     }
 
     const data = {
@@ -89,18 +87,15 @@ router.post('/login', [
       }
     }
     const authToken = jwt.sign(data, JMT_SECT);
-    success = true;
-    res.json({ success, authToken })
-    res.setHeader('Content-Type', 'application/json');
+
+    res.json({ success: true, authToken });
 
   } catch (error) {
     console.error(error.message);
-    console.log("koko");
     res.status(500).send("Internal Server Error");
   }
-
-
 });
+
 
 //Route 3:Get loggin User Details using :POST "/api/auth/getuser".Login required
 router.post("/getuser", fetchuser, async (req, res) => {
