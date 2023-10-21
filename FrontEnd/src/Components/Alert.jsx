@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useContext } from "react";
+import noteContext from "../Context/Notes/noteContext";
 
-function Alert(props) {
+function Alert() {
+  const {alert}=useContext(noteContext);
   return (
     <>
-      <div className="alert alert-primary" role="alert">
-        {props.message}
-      </div>
+    <div className="d-flex align-item-center" style={{"height":"70px"}}>
+      {!(alert==null) && <div className="alert alert-primary flex-grow-1" role="alert">
+          {alert.type} and {alert.message}
+      </div>}
+    </div>
     </>
   );
 }

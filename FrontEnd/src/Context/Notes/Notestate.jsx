@@ -8,13 +8,15 @@ const NoteState = (props) => {
   const [notes, setState] = useState(notesArray);
 
 
+  const [alert,setAlert]=useState(null);
+
   const getAllNotes=async ()=>{
     const response=await fetch(`${host}/api/notes/fetchallnotes`,{
       method:'GET',
       headers: {
         "Content-Type": "application/json",
         "auth-token":
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjUyMDE2YzFhNGNjNGI5Y2RjOGRjYzc0In0sImlhdCI6MTY5NjYwMTgxMn0.4doase39Syi6vvHVGpf7pD6g-o75zbtiGKnNf4cRVjA", // Replace with your actual auth token
+          `${localStorage.getItem("token")}`
       }
     });
 
@@ -36,7 +38,7 @@ const NoteState = (props) => {
         headers: {
           "Content-Type": "application/json",
           "auth-token":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjUyMDE2YzFhNGNjNGI5Y2RjOGRjYzc0In0sImlhdCI6MTY5NjYwMTgxMn0.4doase39Syi6vvHVGpf7pD6g-o75zbtiGKnNf4cRVjA", // Replace with your actual auth token
+          `${localStorage.getItem("token")}`
         },
         body: JSON.stringify(data),
       });
@@ -62,7 +64,7 @@ const NoteState = (props) => {
       const response = await fetch(url, {
         method: "PUT",
         headers: {
-          "auth-token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjUyMDE2YzFhNGNjNGI5Y2RjOGRjYzc0In0sImlhdCI6MTY5NjYwMTgxMn0.4doase39Syi6vvHVGpf7pD6g-o75zbtiGKnNf4cRVjA",
+          "auth-token":`${localStorage.getItem('token')}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
@@ -94,7 +96,7 @@ try {
     headers: {
       "Content-Type": "application/json",
       "auth-token":
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjUyMDE2YzFhNGNjNGI5Y2RjOGRjYzc0In0sImlhdCI6MTY5NjYwMTgxMn0.4doase39Syi6vvHVGpf7pD6g-o75zbtiGKnNf4cRVjA", // Replace with your actual auth token
+      `${localStorage.getItem("token")}`
     }
   });
   const newNotes = notes.filter((note) => { return note._id !== id })
@@ -107,7 +109,7 @@ try {
 
 
   return (
-    <NoteContext.Provider value={{ notes, addNote, updateNote, deleteNote,getAllNotes }}>
+    <NoteContext.Provider value={{ notes, addNote, updateNote, deleteNote,getAllNotes,alert,setAlert }}>
       {props.children}
     </NoteContext.Provider>
   );

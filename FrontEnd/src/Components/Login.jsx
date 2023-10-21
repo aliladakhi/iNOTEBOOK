@@ -1,12 +1,13 @@
-import React, { useState } from "react";
-// import { useHistory } from 'react-router-dom'
+import React, { useState ,useContext} from "react";
+import noteContext from "../Context/Notes/noteContext";
+import { useNavigate } from "react-router-dom";
 
-const Login = () => {
+const Login = (props) => {
+  const {setAlert}=useContext(noteContext)
   const [credentials, setCredentials] = useState({ email: "", password: "" });
-//   let history=useHistory();
+  let history=useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     const response = await fetch("http://localhost:5000/api/auth/login", {
       method: "POST",
       headers: {
@@ -19,18 +20,25 @@ const Login = () => {
     });
     const json = await response.json();
 
-    console.log(json);
     if (json.success) {
-      // Save the auth token and redirect
+
       localStorage.setItem("token", json.authToken);
-    //   history.push("/");
+      handleAlert({type:"okay",message:"signin successgully "})
+      history("/");
     } else {
-      alert("Invalid credentials");
+      handleAlert({type:"error",message:"unsuccessfull"})
     }
   };
 
+  const handleAlert=({type,message})=>{
+    setAlert({type,message});
+  }
+
   const onChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
+    setTimeout(() => {
+      setAlert(null)
+    }, 4000);
   };
 
   return (
@@ -67,7 +75,7 @@ const Login = () => {
           />
         </div>
 
-        <button className="btn btn-primary" onClick={handleSubmit}>
+        <button type="button" className="btn btn-primary" onClick={handleSubmit}>
           Submit
         </button>
       </form>

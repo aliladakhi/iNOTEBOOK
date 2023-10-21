@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
-import '../style/Signup.css';
+import React, { useEffect, useState,useContext } from "react";
+import noteContext from "../Context/Notes/noteContext";
+import "../style/Signup.css";
 
 function Signup() {
-  const [type,setType]=useState("password");
-  const [chk,setcheck]=useState(false);
+  const {setAlert}=useContext(noteContext)
+  const [type, setType] = useState("password");
+  const [chk, setcheck] = useState(false);
   const [cred, setCred] = useState({
     username: "",
     email: "",
@@ -12,54 +14,61 @@ function Signup() {
   });
 
   const saveCred = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/auth/createuser', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ name: cred.username, email: cred.email, password: cred.password })
-      });
-  
-      if (!response.ok) {
-        console.error('Response Status:', response.status);
-        throw new Error('Server responded with an error');
-      }
-      
-      const json = await response.json();
-      console.log(json);
-    } catch (error) {
-      console.error("An error occurred:", error);
+    const response = await fetch("http://localhost:5000/api/auth/createuser", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: cred.username,
+        email: cred.email,
+        password: cred.password,
+      }),
+    }).catch(error => console.error('Error:', error));
+
+    const json = await response.json();
+ 
+
+    if (json.success) {
+      localStorage.setItem("token", json.authToken);
+      //   history.push("/");
+      setCred({ username: "",
+    email: "",
+    password: "",
+    confirm_password: ""})
+    handleAlert({type:"okay",message:"Login successgully "})
+    } else {
+      handleAlert({type:"error",message:"Login not  "})
     }
+
+    
+  };
+
+  const handleAlert=({type,message})=>{
+    setAlert({type,message});
   }
-
-
 
 
   const valueChange = (e) => {
     setCred({ ...cred, [e.target.name]: e.target.value });
   };
 
-
   useEffect(() => {
-    if(chk){
-      setType("text")
+    if (chk) {
+      setType("text");
+    } else {
+      setType("password");
     }
-    else{
-      setType("password")
-    }
-    console.log(chk)
   }, [chk]);
 
-
-  const checkchange=(e)=>{
-    if(!chk){
-    setcheck(true);
-    }
-    else{
+  const checkchange = (e) => {
+    if (!chk) {
+      setcheck(true);
+    } else {
       setcheck(false);
     }
-  }
+  };
+  
   return (
     <div>
       <form>
@@ -130,7 +139,12 @@ function Signup() {
             value={cred.confirm_password}
             name="confirm_password"
             type={type}
-            className={`form-control ${cred.password !== cred.confirm_password && cred.password.length !== 0 ? 'error-focused' : 'okay-focused'}`}
+            className={`form-control ${
+              cred.password !== cred.confirm_password &&
+              cred.password.length !== 0
+                ? "error-focused"
+                : "okay-focused"
+            }`}
             id="confirm_password"
           />
         </div>
@@ -141,12 +155,16 @@ function Signup() {
               cred.password.length !== 0
             )
           }
-          type="submit"
+          type="button"
           className="btn btn-primary"
-          onClick={saveCred}
+          onClick={() => {
+       
+            saveCred();
+          }}
         >
           Submit
         </button>
+      
       </form>
     </div>
   );
